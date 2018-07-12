@@ -1,8 +1,8 @@
 <?php
 	require ('WikiFanResearchBot.php');
-	$Botusr='Root@BotJules';
-	$Botpwd='r6i6e3qhipddv9p8fn4v1i0k3eb39vsu';
-	$wiki='localhost/WikiFanResearch';
+	$Botusr='edit_with_username';
+	$Botpwd='edit_with_password';
+	$wiki='address/YourWiki';
 	echo "
 
 __________          __         ____.       .__                   
@@ -15,14 +15,11 @@ __________          __         ____.       .__
 ";
 	$BotJules=new WikiFanResearchBot($Botusr,$Botpwd,$wiki);
 	
-	//come creo array? Prendo l'elenco delle pagine, http://atlasgeneticsoncology.org//Genes/, 
-	//e quindi il collegamento alla pagina html,
-	//infine lo inserisco nell'array da dare al bot.
-	$Pagine=array("FACCID101","FADID103","FANCEID293","FANCGID295","GC_FAAP24"); 
+	$Pagine=array(//list of pages to extract); 
 	
 	//login
 	$ch=curl_init();
-	$logreq='localhost/WikiFanResearch/api.php?action=query&meta=tokens&type=login&format=json';
+	$logreq="$wiki/api.php?action=query&meta=tokens&type=login&format=json";
 	curl_setopt($ch,CURLOPT_URL,$logreq);
     curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
     curl_setopt($ch, CURLOPT_COOKIEFILE, 'cookie.txt');
@@ -36,7 +33,7 @@ __________          __         ____.       .__
     //Fetchato il token per login, devo mandare richiesta post
     $chp=curl_init();
     $postdata="action=login&lgname=$Botusr&lgpassword=$Botpwd&lgtoken=$logintoken&format=json";
-			  curl_setopt($chp, CURLOPT_URL, 'localhost/WikiFanResearch/api.php');
+			  curl_setopt($chp, CURLOPT_URL, "$wiki/api.php");
               curl_setopt($chp, CURLOPT_POST, 1);
               curl_setopt($chp, CURLOPT_COOKIEJAR, 'cookie.txt');
               curl_setopt($chp, CURLOPT_COOKIEFILE, 'cookie.txt');
@@ -55,19 +52,14 @@ __________          __         ____.       .__
 	} else { 
 		echo "Login fallito: ".$postresponsedec['login']['result']."\n";
 	}
-	
-	
-	$page='FACCID101';
-//foreach ($Pagine as $page) {
-	$url="http://atlasgeneticsoncology.org/Genes/$page.html"; 
+
+foreach ($Pagine as $page) {
+	$url="http://atlasgeneticsoncology.org/Genes/$page.html"; //url on Atlas of the gene page
 	//Azioni
 	$PaginaGene=$BotJules->retrieveINFOgene($url,$page);
-	//$Creazione=$BotJules->create_section($page,$PaginaGene,$GLOBALS['NomeGene'],$wiki);
-	//echo $PaginaGene;
-	//$section='Description';
-	//$newcontent='Description Updates';
-	//$pg=$BotJules->EditContent($page,$section,$newcontent);
-//}
+	$Creazione=$BotJules->create_section($page,$PaginaGene,$GLOBALS['NomeGene'],$wiki);
+
+}
 
 	//logout
 	$urlogout='localhost/WikiFanResearch/api.php?action=logout&format=json';
