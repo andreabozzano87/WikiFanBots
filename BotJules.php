@@ -55,9 +55,8 @@ __________          __         ____.       .__
 
 foreach ($Pagine as $page) {
 	$url="http://atlasgeneticsoncology.org/Genes/$page.html"; //url on Atlas of the gene page
-	//Azioni
-	$PaginaGene=$BotJules->retrieveINFOgene($url,$page);
-	$Creazione=$BotJules->create_section($page,$PaginaGene,$GLOBALS['NomeGene'],$wiki);
+	//Here you have to call all the actions you need the bot for. They can be found in 
+	//WikiFanResearchBot.php file
 
 }
 
