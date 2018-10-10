@@ -15,7 +15,7 @@
 class WikiFanResearchBot {
     public $epm=5;
     public $maxlag=5;
-    public $wiki;
+    public $wiki='yourwiki';
     public $username;
     public $password;
     public $lgtoken;
@@ -40,7 +40,7 @@ public function __construct($username,$password,$wiki,$epm=5,$maxlag=5) {
 //  This function defines the default $wiki as WikiFanResearch
 private function wiki($wiki) { 
         if ($wiki=="") {
-            return $wiki="localhost/WikiFanResearch";
+            return $wiki="path to YourWiki";
             } 
             return $wiki;
 }
@@ -111,9 +111,10 @@ else {
 
 //  This function is used to fetch an edit token for the page you're gonna edit. It just sends a GET request for edit token.
   public function FetchEditToken($page) {
-
+	  
+    $wiki=$this->wiki;
     $pagetitle=str_replace(' ','_',$page);
-    $url="http://localhost/WikiFanResearch/api.php?action=query&prop=info|revisions&intoken=edit&titles=$page&format=json";
+    $url="http://$wiki/api.php?action=query&prop=info|revisions&intoken=edit&titles=$page&format=json";
     $ch=curl_init();
     curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch,CURLOPT_COOKIEJAR,'cookie.txt');
@@ -184,7 +185,7 @@ public function testodaHTML($paginaHTML,$topic,$textofind,$stopchar='</TD>') {
 //Not used. This function was intended to create a page with a template from an HTML page. See createsection()
 public function CreaPaginaGene($url,$page) {
 
-    $wiki='http://localhost/WikiFanResearch/';
+    $wiki=$this->wiki;
     $AuthorName=$this->testodaHTML($url,"Written","</TD><TD>");
     echo "Nome: $AuthorName\n";
     $Quotation=$AuthorName;
@@ -219,7 +220,7 @@ return $paginaHTML;
 
 //  This function is used to fetch a CSRFToken with a get request to APIs
 public function fetchedit(){
-	$url='localhost/WikiFanResearch/api.php?action=query&meta=tokens&format=json';
+	$url='http://$wiki/api.php?action=query&meta=tokens&format=json';
 	$ch = curl_init();
 		  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
           curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
