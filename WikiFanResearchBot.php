@@ -90,7 +90,7 @@ private function wiki($wiki) {
         $pagina=$this->callAPI($wiki,$url_query,"json");
         echo "l'url della query è: " .$url_query."\n";
         $pagina_decoded=json_decode($pagina,true);
-        var_dump($pagina_decoded);
+        //var_dump($pagina_decoded); useful for debug, to see the decoded page in the output console
         return $pagina_decoded;
 }
 
@@ -138,7 +138,7 @@ public function eseguicomandoDB($query) {
     $conn=new mysqli($db_host,$db_user,$db_password,$db_name);
 if (!$conn)
     {
-       die("Impossibile collegarsi al DB: <br />".mysql_error());
+       die("Cannot connect to DB: <br />".mysql_error());
     }
     $result=mysqli_query($conn,$query);
     mysqli_close($conn);
@@ -146,7 +146,7 @@ if (!$conn)
 }
 
 
-//  This function gets the ID of the page you're editing somehow, directly from the DB
+//  This function gets the ID of the page you're editing, directly from the DB, given the title of the page
 public function controllaIDpagina($page) { 
     $query="SELECT page_id FROM enpage WHERE page_title='$page'";
     $risultato=$this->eseguicomandoDB($query);
@@ -184,7 +184,7 @@ public function testodaHTML($paginaHTML,$topic,$textofind,$stopchar='</TD>') {
 
 //Not used. This function was intended to create a page with a template from an HTML page. See createsection()
 public function CreaPaginaGene($url,$page) {
-
+//TODO script the email part to get the email from the Atlas
     $wiki=$this->wiki;
     $AuthorName=$this->testodaHTML($url,"Written","</TD><TD>");
     echo "Nome: $AuthorName\n";
@@ -194,7 +194,7 @@ public function CreaPaginaGene($url,$page) {
     $Email="NonpresenteAtlas";
     $texttoadd="\{{AuthorInfoBox|Author Name=$AuthorName|Quotation=$Quotation|Affiliation=$Affiliation|Email address=$Email}}";
     
-    echo "i dati post con il template sono:\n".$texttoadd."\n";
+    //echo "i dati post con il template sono:\n".$texttoadd."\n"; useful for debugging in console
     
     $edittoken=$GLOBALS['edittoken'];
     $postdata="action=edit&title=$page&section=new&text=$texttoadd&token=".urlencode($edittoken)."&format=json";
@@ -213,8 +213,7 @@ public function HtmlToString($url) {
     curl_close($ch);
     file_put_contents('paginaHtmlResponse.txt',$response);
     $paginaHTML=$response;
-
-return $paginaHTML;
+	
     return $response;
 }
 
@@ -222,7 +221,7 @@ return $paginaHTML;
 public function fetchedit(){
 	$url='http://$wiki/api.php?action=query&meta=tokens&format=json';
 	$ch = curl_init();
-		  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
           curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
           curl_setopt($ch, CURLOPT_COOKIEFILE, 'cookie.txt');
           curl_setopt($ch, CURLOPT_URL, ($url));
@@ -230,7 +229,7 @@ public function fetchedit(){
     curl_close($ch);
 	$rdec=json_decode($response,true);
 	$token=$rdec['query']['tokens']['csrftoken'];
-	//echo "Siamo in fetchedit(), il token è: $token\n";
+	//echo "We are in fetchedit(), il token è: $token\n";
 	return $token;
 }
 
@@ -242,7 +241,6 @@ public function UploadImage($nomefile){
 	$EncodedFileUrl=urlencode('http://atlasgeneticsoncology.org//Genes/png/'.$nomefile);
 	$postdata='action=upload&format=json&ignorewarnings=true&filename='.$nomefile.'&url='.$EncodedFileUrl.'&token='.urlencode($edittoken);
 	$risp=$this->postAPI($wiki, '/api.php',$postdata);
-	
 }
 
 //This function can discriminate between a text string or an image file, returning the wikitext syntax of the file
@@ -271,6 +269,7 @@ public function textorimage($paginaHTML,$startsearch,$topic,$stopsearch){
 public function retrieveINFOgene($url) {
     $paginaHTML=$this->HtmlToString($url);
     //$ImplicatedIn=$this->getImplicatedIn($paginaHTML);
+	
    //AuthorInfoBox
    $infoauthor="";
    $infoauthor="{{AuthorInfoBox|Author Name=";
@@ -294,9 +293,10 @@ public function retrieveINFOgene($url) {
     |Locus ID=$LocusID
     |Link on Atlas=$url
     }}";
+    //TODO: make an external link in the description of the image to open the image in a blank tab,
+    //something like [[File::Name.ext|options|link(internal or external)]]
     
-	//in Description metti il link a quell'immagine come [[File::Nome.estensione|opzioni|link(interno o esterno)]]
-    //GenePage
+	//GenePage
     $topic="Description</TD><TD>";
     $stop="</TD></TR>";
     $Description=$this->textorimage($paginaHTML,'DNA/RNA',$topic,$stop);
@@ -320,24 +320,20 @@ public function getImplicatedIn($paginaHTML) {
 	$lastpos=strpos($paginaHTML,"Implicated in");
 	$newrecord="";
 	$nextstep=$lastpos;
-		$ImplicatedThread=substr($paginaHTML, $lastpos);
-		$finethread=strpos($ImplicatedThread,"<Strong><FONT SIZE=4>");
-		$ImplicatedThread=substr($ImplicatedThread,0,$finethread);
-		//$entity=$this->testodaHTML($ImplicatedThread,"Entity</Strong>","</TD><TD><Strong>","</TD></TR>");
-		//$note=$this->testodaHTML($ImplicatedThread,"Entity</Strong>","Note</Strong></TD><TD>","</TD></TR>");
-		//$newrecord=$newrecord."* [[".strip_tags($entity)."]] - ".strip_tags($note)."\n";
-		//$nextstep=strpos($ImplicatedThread,$note)+strlen($note);
+	$ImplicatedThread=substr($paginaHTML, $lastpos);
+	$finethread=strpos($ImplicatedThread,"<Strong><FONT SIZE=4>");
+	$ImplicatedThread=substr($ImplicatedThread,0,$finethread);
 	
 	while(strpos($ImplicatedThread,"Entity")!==false) {
 			if (strpos($ImplicatedThread,"Entity</Strong>")===false)
 			{
 				break;
 			}//AGGIUSTA QUA, FORMAT E ESTRAZIONE DATI CORRETTA
-				$ImplicatedThread=substr($ImplicatedThread, $nextstep);
-				$entity=$this->testodaHTML($ImplicatedThread,"Entity</Strong>","</TD><TD><Strong>","</TD></TR>");
-				$note=$this->testodaHTML($ImplicatedThread,"Entity</Strong>","Note</Strong></TD><TD>","</TD></TR>");
-				$newrecord=$newrecord."* [[".strip_tags($entity)."]] - ".strip_tags($note)."\n";
-				$nextstep=strpos($ImplicatedThread,$note)+strlen($note);
+			$ImplicatedThread=substr($ImplicatedThread, $nextstep);
+			$entity=$this->testodaHTML($ImplicatedThread,"Entity</Strong>","</TD><TD><Strong>","</TD></TR>");
+			$note=$this->testodaHTML($ImplicatedThread,"Entity</Strong>","Note</Strong></TD><TD>","</TD></TR>");
+			$newrecord=$newrecord."* [[".strip_tags($entity)."]] - ".strip_tags($note)."\n";
+			$nextstep=strpos($ImplicatedThread,$note)+strlen($note);
 
 	}
 	echo $newrecord."\n";
