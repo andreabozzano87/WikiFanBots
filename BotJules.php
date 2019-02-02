@@ -3,6 +3,7 @@
 	$Botusr='edit_with_username';
 	$Botpwd='edit_with_password';
 	$wiki='address/YourWiki';
+//You don't really need this ASCII art, was just to be fabolous!
 	echo "
 
 __________          __         ____.       .__                   
@@ -30,7 +31,7 @@ __________          __         ____.       .__
     $logintoken=urlencode($jsonresponse['query']['tokens']['logintoken']);
     $ContentType="application/x-www-form-urlencoded";
     
-    //Fetchato il token per login, devo mandare richiesta post
+    //Once the token is fetched, it sends a post request
     $chp=curl_init();
     $postdata="action=login&lgname=$Botusr&lgpassword=$Botpwd&lgtoken=$logintoken&format=json";
 			  curl_setopt($chp, CURLOPT_URL, "$wiki/api.php");
@@ -58,8 +59,8 @@ foreach ($Pagine as $page) {
 	//Here you have to call all the actions you need the bot for. They can be found in 
 	//WikiFanResearchBot.php file
 
-}
 
+}
 	//logout
 	$urlogout='localhost/WikiFanResearch/api.php?action=logout&format=json';
 	$ch=curl_init();
