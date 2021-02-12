@@ -8,4 +8,6 @@ This is [WikiFanResearch](http://bioinformatics.hsanmartino.it/WikiFanResearch)
 
 And this is [WikiFan](http://bioinformatics.hsanmartino.it/WikiFan)
 
+I'll try to keep this framework updated, for further usage.
+
 Hope you find it useful  :+1:
